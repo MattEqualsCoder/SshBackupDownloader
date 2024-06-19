@@ -1,4 +1,4 @@
-import { RemoteDirectory, LocalDirectory, SshHost, SshUser, SshPassword, SshKeyPath, SshKeySecret, SshPort} from './environment'
+import { RemoteDirectory, LocalDirectory, SshHost, SshUser, SshPassword, SshKeyPath, SshKeySecret, SshPort, MaxBackups} from './environment'
 import { Logger } from './logger';
 const Client = require('ssh2-sftp-client');
 import fs from 'fs';
@@ -48,19 +48,40 @@ export class Downloader {
             if (fs.existsSync(localFile)) {
                 fs.rmSync(localFile);
             }
-            
+
             Logger.info(`Downloading remote file ${remoteFile} to ${localFile}`)
 
             return sftp.get(remoteFile, localFile);
         }).then(() => {
             Logger.info("Download complete")
             sftp.end();
+            this.CleanupBackups();
         }).catch((err: any) => {
             Logger.error(`Failed to download file: ${err.message}`);
         });
     }
 
-    DownloadFile(path: string) {
+    CleanupBackups() {
+        let backups = fs.readdirSync(LocalDirectory ?? "")
+            .map(x => new Backup(x))
+            .sort((a, b) => a.ModifiedTime.getTime() - b.ModifiedTime.getTime());
 
+        let backupsToDelete = backups.length - MaxBackups;
+
+        for (let i = 0; i < backupsToDelete; i++) {
+            Logger.info(`Deleting old backup ${backups[i].Path}`);
+            fs.rmSync(backups[i].Path);
+        }
     }
+}
+
+class Backup
+{
+    constructor(file: string) {
+        this.Path = `${LocalDirectory}/${file}`;
+        this.ModifiedTime = fs.statSync(`${LocalDirectory}/${file}`).atime
+    }
+
+    Path: string;
+    ModifiedTime: Date;
 }

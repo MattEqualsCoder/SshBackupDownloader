@@ -10,6 +10,7 @@ const SshUser = process.env.SSH_USER;
 const SshPassword = process.env.SSH_PASSWORD;
 const SshKeyPath = process.env.SSH_KEY_PATH;
 const SshKeySecret = process.env.SSH_KEY_SECRET;
+const MaxBackups = parseInt(process.env.MAX_BACKUPS ?? "30")
 
 export {
     BackupCronSchedule,
@@ -20,5 +21,6 @@ export {
     SshUser,
     SshPassword,
     SshKeyPath,
-    SshKeySecret
+    SshKeySecret,
+    MaxBackups
 }
