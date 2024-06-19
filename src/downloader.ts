@@ -1,23 +1,66 @@
-import { BackupPaths, SshHost, SshUser, SshPassword, SshKeyPath, SshKeySecret} from './environment'
-let Client = require('ssh2-sftp-client');
+import { RemoteDirectory, LocalDirectory, SshHost, SshUser, SshPassword, SshKeyPath, SshKeySecret, SshPort} from './environment'
+import { Logger } from './logger';
+const Client = require('ssh2-sftp-client');
+import fs from 'fs';
 
 export class Downloader {
+
+    constructor() {
+        if (!RemoteDirectory) {
+            Logger.error("No remote directory specified");
+            throw "No remote directory specified";
+        }
+
+        if (!LocalDirectory) {
+            Logger.error("No local directory specified");
+            throw "No local directory specified";
+        }
+    }
 
     DownloadBackups() {
         let sftp = new Client();
 
         sftp.connect({
-            host: '127.0.0.1',
-            port: '8080',
-            username: 'username',
-            password: '******'
+            host: SshHost,
+            port: SshPort,
+            username: SshUser,
+            password: SshPassword,
+            privateKey: SshKeyPath ? fs.readFileSync(SshKeyPath) : undefined,
+            passphrase: SshKeySecret
         }).then(() => {
-            return sftp.list('/pathname');
-        }).then(data => {
-            console.log(data, 'the data info');
-        }).catch(err => {
-            console.log(err, 'catch error');
+            return sftp.list(RemoteDirectory);
+        }).then((data: any[]) => {
+            if (data && data.length) {
+                return data.sort((a, b) => b.modifyTime - a.modifyTime)[0].name;
+            }
+            return "";
+        }).then((file: string) => {
+            if (!file) {
+                return undefined;
+            }
+            let remoteFile = `${RemoteDirectory}/${file}`;
+            let localFile = `${LocalDirectory}/${file}`;
+
+            if (!fs.existsSync(LocalDirectory ?? "")) {
+                fs.mkdirSync(LocalDirectory ?? "");
+            }
+
+            if (fs.existsSync(localFile)) {
+                fs.rmSync(localFile);
+            }
+            
+            Logger.info(`Downloading remote file ${remoteFile} to ${localFile}`)
+
+            return sftp.get(remoteFile, localFile);
+        }).then(() => {
+            Logger.info("Download complete")
+            sftp.end();
+        }).catch((err: any) => {
+            Logger.error(`Failed to download file: ${err.message}`);
         });
     }
 
+    DownloadFile(path: string) {
+
+    }
 }
