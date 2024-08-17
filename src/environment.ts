@@ -1,7 +1,7 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 
-const BackupCronSchedule = process.env.BACKUP_CRON_SCHEDULE ?? '0 8 * * * *';
+const BackupCronSchedule = process.env.BACKUP_CRON_SCHEDULE ?? '0 0 8 * * *'; // Download at 8 am every morning by default
 const RemoteDirectory = process.env.REMOTE_DIRECTORY;
 const LocalDirectory = process.env.LOCAL_DIRECTORY;
 const SshHost = process.env.SSH_HOST;
