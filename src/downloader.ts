@@ -1,4 +1,4 @@
-import { RemoteDirectory, LocalDirectory, SshHost, SshUser, SshPassword, SshKeyPath, SshKeySecret, SshPort, MaxBackups} from './environment'
+import { RemoteDirectory, LocalDirectory, SshHost, SshUser, SshPassword, SshKeyPath, SshKeySecret, SshPort, MaxBackups } from './environment'
 import { Logger } from './logger';
 const Client = require('ssh2-sftp-client');
 import fs from 'fs';
@@ -18,7 +18,7 @@ export class Downloader {
     }
 
     DownloadBackups() {
-        let sftp = new Client();
+        const sftp = new Client();
 
         sftp.connect({
             host: SshHost,
@@ -38,8 +38,8 @@ export class Downloader {
             if (!file) {
                 return undefined;
             }
-            let remoteFile = `${RemoteDirectory}/${file}`;
-            let localFile = `${LocalDirectory}/${file}`;
+            const remoteFile = `${RemoteDirectory}/${file}`;
+            const localFile = `${LocalDirectory}/${file}`;
 
             if (!fs.existsSync(LocalDirectory ?? "")) {
                 fs.mkdirSync(LocalDirectory ?? "");
@@ -62,11 +62,11 @@ export class Downloader {
     }
 
     CleanupBackups() {
-        let backups = fs.readdirSync(LocalDirectory ?? "")
+        const backups = fs.readdirSync(LocalDirectory ?? "")
             .map(x => new Backup(x))
             .sort((a, b) => a.ModifiedTime.getTime() - b.ModifiedTime.getTime());
 
-        let backupsToDelete = backups.length - MaxBackups;
+        const backupsToDelete = backups.length - MaxBackups;
 
         for (let i = 0; i < backupsToDelete; i++) {
             Logger.info(`Deleting old backup ${backups[i].Path}`);
@@ -75,8 +75,7 @@ export class Downloader {
     }
 }
 
-class Backup
-{
+class Backup {
     constructor(file: string) {
         this.Path = `${LocalDirectory}/${file}`;
         this.ModifiedTime = fs.statSync(`${LocalDirectory}/${file}`).atime

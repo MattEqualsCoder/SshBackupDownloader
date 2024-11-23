@@ -1,8 +1,8 @@
 import { Downloader } from "./downloader";
 import { BackupCronSchedule } from "./environment";
-let cron = require('node-cron');
+const cron = require('node-cron');
 
-let downloader = new Downloader();
+const downloader = new Downloader();
 downloader.DownloadBackups();
 
 cron.schedule(BackupCronSchedule, () => {
