@@ -18,6 +18,9 @@ export class Downloader {
     }
 
     DownloadBackups() {
+
+        Logger.info("Starting backup download");
+        
         const sftp = new Client();
 
         sftp.connect({
@@ -28,6 +31,7 @@ export class Downloader {
             privateKey: SshKeyPath ? fs.readFileSync(SshKeyPath) : undefined,
             passphrase: SshKeySecret
         }).then(() => {
+            Logger.info("Connected to sftp");
             return sftp.list(RemoteDirectory);
         }).then((data: any[]) => {
             if (data && data.length) {
@@ -36,6 +40,7 @@ export class Downloader {
             return "";
         }).then((file: string) => {
             if (!file) {
+                Logger.info("No file found");
                 return undefined;
             }
             const remoteFile = `${RemoteDirectory}/${file}`;
