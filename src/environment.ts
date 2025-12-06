@@ -10,7 +10,7 @@ const SshUser = process.env.SSH_USER;
 const SshPassword = process.env.SSH_PASSWORD;
 const SshKeyPath = process.env.SSH_KEY_PATH;
 const SshKeySecret = process.env.SSH_KEY_SECRET;
-const MaxBackups = parseInt(process.env.MAX_BACKUPS ?? "30")
+const MaxBackups = parseInt(process.env.MAX_BACKUPS ?? "30") // Only contain 30 days of backups
 
 export {
     BackupCronSchedule,
